@@ -76,6 +76,10 @@ func FindJobsByRole() {
 		log.Println("Error to find Total jobs!!.", err)
 		// return nil, 0, err
 	}
+	if output == "" {
+		log.Println("Job Title is not acceptable use Another one :)")
+		return
+	}
 	output = strings.TrimSpace(output)
 	fmt.Printf("Total: %s %s\n", output, input)
 	fmt.Println("How many pages You want to scrape?")
