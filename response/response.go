@@ -2,7 +2,6 @@ package response
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -15,15 +14,15 @@ func MonsterResponsePage(selector string, resp *http.Response) (string, error) {
 		fmt.Println("Go query failed!!!", err)
 		return "", err
 	}
-	res, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(res))
+	// res, _ := ioutil.ReadAll(resp.Body)
+	// fmt.Println(string(res))
 	output := ""
 	doc.Find(selector).Each(func(index int, item *goquery.Selection) {
 		contents, _ := item.Html()
 		output = contents
 	})
 	if output == "" {
-		log.Println("WARNING: Output string is Null!!!")
+		log.Println("WARNING: output string is blank!!!")
 	}
 	// fmt.Println(output)
 	return output, nil
