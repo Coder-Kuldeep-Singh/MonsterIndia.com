@@ -15,7 +15,7 @@ func main() {
 	// for _, item := range items {
 	// 	fmt.Println(item)
 	// }
-	role.FindJobsByRole()
+	role.FindDiplomaJobs()
 	fmt.Println("====================================================================================================")
 
 }
