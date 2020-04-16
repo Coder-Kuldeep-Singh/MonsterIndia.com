@@ -33,7 +33,7 @@ func FindJobsByRoleSkill() {
 	input, _ := jobtitle.ReadString('\n')
 	title := strings.Replace(input, " ", "-", -1)
 	title = strings.Replace(title, "\n", "", -1)
-	title = strings.ToLower(title)
+	title = strings.Title(strings.ToLower((title)))
 	BaseUrl := "https://www.monsterindia.com/search/" + title
 	resp, err := proxy.MonsterDomain(BaseUrl)
 	if err != nil {
@@ -108,8 +108,88 @@ func FindJobsByLocation() {
 	input, _ := jobtitle.ReadString('\n')
 	title := strings.Replace(input, " ", "-", -1)
 	title = strings.Replace(title, "\n", "", -1)
-	title = strings.ToLower(title)
+	title = strings.Title(strings.ToLower((title)))
 	BaseUrl := "https://www.monsterindia.com/search/jobs-in-" + title
+	resp, err := proxy.MonsterDomain(BaseUrl)
+	if err != nil {
+		fmt.Println("Proxy server Failed!! ", err)
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	SecretIdForRedirectionForJobByRole := ""
+	re := regexp.MustCompile(`"applicationID":"(.*)"`)
+	ApplicationID := re.FindAllStringSubmatch(string(body), -1)
+
+	for _, url := range ApplicationID {
+		id := strings.Split(url[1], ",")
+		newid := id[0]
+		newid = strings.Replace(newid, `"`, "", -1)
+		SecretIdForRedirectionForJobByRole = newid
+	}
+
+	SecretIdKey := ""
+	reg := regexp.MustCompile(`"licenseKey":"(.*)"`)
+	ApplicationKey := reg.FindAllStringSubmatch(string(body), -1)
+
+	for _, url := range ApplicationKey {
+		id := strings.Split(url[1], ",")
+		newid := id[0]
+		newid = strings.Replace(newid, `"`, "", -1)
+		secret1 := newid[0:4]
+		secret2 := newid[6:10]
+		secret3 := newid[11:15]
+		secret4 := newid[16:]
+		SecretIdKey = secret1 + "-" + secret2 + "-" + secret3 + "-" + secret4
+
+	}
+
+	respAgain, err := proxy.MonsterDomain(BaseUrl + "?searchId=" + SecretIdForRedirectionForJobByRole + SecretIdKey)
+	if err != nil {
+		log.Println("Error failed proxy with secret id!!", err)
+	}
+	output, err := response.MonsterResponsePage("div.lft-content strong.fs-24.normal.ffm-arial", respAgain)
+	if err != nil {
+		log.Println("Error to find Total jobs!!.", err)
+		// return nil, 0, err
+	}
+	if output == "" {
+		log.Println("Job Title is not acceptable use Another one :)")
+		return
+	}
+	output = strings.TrimSpace(output)
+	input = strings.Title(strings.ToLower((input)))
+	fmt.Printf("Total: %s Jobs in %s\n", output, input)
+	fmt.Println("How many pages You want to scrape?")
+	var count int
+	fmt.Scanln(&count)
+	results, count, err := Jobs(BaseUrl, count, SecretIdForRedirectionForJobByRole, SecretIdKey)
+	if err != nil {
+		log.Println("Error while trying to scrape job..", err)
+	}
+	fmt.Println(count)
+	fmt.Println(results)
+
+}
+
+func FindJobsByKeywordAndLocation() {
+	fmt.Println("Software Initializing.")
+	time.Sleep(time.Second * 5)
+	fmt.Println("Software Start.")
+	time.Sleep(time.Second * 3)
+	fmt.Println("Find Jobs by Keyword and Location")
+	keyword := bufio.NewReader(os.Stdin)
+	fmt.Printf("Please Provide the Job Keyword: ")
+	key, _ := keyword.ReadString('\n')
+	title := strings.Replace(key, " ", "-", -1)
+	title = strings.Replace(title, "\n", "", -1)
+	title = strings.Title(strings.ToLower((title)))
+
+	jobtitle := bufio.NewReader(os.Stdin)
+	fmt.Printf("Please Provide the Location: ")
+	input, _ := jobtitle.ReadString('\n')
+	location := strings.Replace(input, " ", "-", -1)
+	location = strings.Replace(location, "\n", "", -1)
+	location = strings.Title(strings.ToLower((location)))
+	BaseUrl := "https://www.monsterindia.com/search/" + title + "-jobs-in" + location
 	resp, err := proxy.MonsterDomain(BaseUrl)
 	if err != nil {
 		fmt.Println("Proxy server Failed!! ", err)
@@ -757,6 +837,7 @@ func FindDiplomaJobs() {
 
 func Jobs(BaseUrl string, count int, SecretIdForRedirectionForJobByRole, SecretIdKey string) ([]JobResult, int, error) {
 	results := []JobResult{}
+	fmt.Println("You have to wait few minutes Process Running in BackGround..")
 	var totalCompanies int
 	for i := 1; i <= count; i++ {
 		num := strconv.Itoa(i)
