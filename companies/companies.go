@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"MonsterIndia.com/proxy"
 	"MonsterIndia.com/response"
@@ -103,11 +104,15 @@ func FindAllCompanies() ([]CompanyResult, int, error) {
 }
 
 // https: //my.monsterindia.com/find-companies.html?l=D
-func FindCompaniesByCharacter(Alphabat string) ([]CompanyResult, int, error) {
+func FindCompaniesByCharacter() ([]CompanyResult, int, error) {
+	fmt.Println("Software Initializing.")
+	time.Sleep(time.Second * 5)
+	fmt.Println("Software Start.")
+	time.Sleep(time.Second * 3)
+	fmt.Println("Provide the Character to Find Company..")
+	var Alphabat string
+	fmt.Scanln(&Alphabat)
 	Alphabat = strings.ToUpper(Alphabat)
-	fmt.Println("How many pages You want to scrape? ")
-	var count int
-	fmt.Scanln(&count)
 	BaseUrl := "https://my.monsterindia.com/find-companies.html?l=" + Alphabat
 	resp, err := proxy.MonsterDomain(BaseUrl)
 	if err != nil {
@@ -121,8 +126,10 @@ func FindCompaniesByCharacter(Alphabat string) ([]CompanyResult, int, error) {
 	fmt.Println("Total: ", output)
 	results := []CompanyResult{}
 	var totalCompanies int
+	fmt.Println("How many pages You want to scrape? ")
+	var count int
+	fmt.Scanln(&count)
 	for i := 1; i <= count; i++ {
-		// fmt.Println(i)
 		num := strconv.Itoa(i)
 		resp, err := proxy.MonsterDomain(BaseUrl + "&p=" + num)
 		if err != nil {
