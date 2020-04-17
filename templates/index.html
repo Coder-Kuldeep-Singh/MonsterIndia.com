@@ -21,7 +21,12 @@
       <input type="submit" value="Login" />
     </form>
     <br />
-    {{if .First}} FIRST: {{.First}} LAST: {{.Last}} SUBSCRIBED: {{.Subscribed}}
-    {{end}}
+    {{if .First}} {{ range $index, $element := .First }}FIRST: {{.First}} LAST:
+    {{.Last}} SUBSCRIBED: {{.Subscribed}}
+    <br />
+    <h1>Result</h1>
+    <br />
+    <p>{{.Output}}</p>
+    {{end}}{{end}}
   </body>
 </html>
