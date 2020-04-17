@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Scraper Finished</h1>
+    {{if .ResultRank}}
+    <div>
+      <div>
+        <h3>Total {{.TotalCount}} Results Found</h3>
+      </div>
+      <div>
+        <h1>ResultRank:</h1>
+        <p>{{.ResultRank}}</p>
+      </div>
+      <div>
+        <h1>ResultJob:</h1>
+        <p>{{.ResultJob}}</p>
+      </div>
+      <div>
+        <h1>ResultCompany:</h1>
+        <p>{{.ResultCompany}}</p>
+      </div>
+      <div>
+        <h1>ResultDescription:</h1>
+        <p>{{.ResultDescription}}</p>
+      </div>
+    </div>
+    {{end}}
+  </body>
+</html>
