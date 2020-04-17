@@ -3,8 +3,10 @@ package role
 import (
 	"bufio"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"strconv"
@@ -26,7 +28,24 @@ type JobResult struct {
 	ResultSkills      string
 }
 
-func FindJobsByRoleSkill() {
+type ShowResults struct {
+	ResultRank        int
+	ResultJob         string
+	ResultCompnay     string
+	ResultLocation    string
+	ResultIncome      string
+	ResultDescription string
+	ResultSkills      string
+	TotalCount        string
+}
+
+var tpl *template.Template
+
+func init() {
+	tpl = template.Must(template.ParseGlob("templates/*"))
+}
+
+func FindJobsByRoleSkill(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("find jobs by Role| Skill IT | Skill Non-IT")
 	jobtitle := bufio.NewReader(os.Stdin)
 	fmt.Println("Please Provide the Job Title..")
@@ -92,6 +111,7 @@ func FindJobsByRoleSkill() {
 	}
 	fmt.Println(count)
 	fmt.Println(results)
+	tpl.ExecuteTemplate(w, "result.html", &results)
 
 	// }
 
@@ -170,7 +190,7 @@ func FindJobsByLocation() {
 
 }
 
-func FindJobsByKeywordAndLocation() {
+func FindJobsByKeywordAndLocation(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Software Initializing.")
 	time.Sleep(time.Second * 5)
 	fmt.Println("Software Start.")
@@ -193,6 +213,7 @@ func FindJobsByKeywordAndLocation() {
 	resp, err := proxy.MonsterDomain(BaseUrl)
 	if err != nil {
 		fmt.Println("Proxy server Failed!! ", err)
+		return
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
 	SecretIdForRedirectionForJobByRole := ""
@@ -225,10 +246,12 @@ func FindJobsByKeywordAndLocation() {
 	respAgain, err := proxy.MonsterDomain(BaseUrl + "?searchId=" + SecretIdForRedirectionForJobByRole + SecretIdKey)
 	if err != nil {
 		log.Println("Error failed proxy with secret id!!", err)
+		return
 	}
 	output, err := response.MonsterResponsePage("div.lft-content strong.fs-24.normal.ffm-arial", respAgain)
 	if err != nil {
 		log.Println("Error to find Total jobs!!.", err)
+		return
 		// return nil, 0, err
 	}
 	if output == "" {
@@ -244,9 +267,28 @@ func FindJobsByKeywordAndLocation() {
 	results, count, err := Jobs(BaseUrl, count, SecretIdForRedirectionForJobByRole, SecretIdKey)
 	if err != nil {
 		log.Println("Error while trying to scrape job..", err)
+		return
 	}
 	fmt.Println(count)
 	fmt.Println(results)
+	// for _, item := range results {
+	// 	fmt.Println(item.ResultJob)
+
+	// }
+	final := ShowResults{}
+	for _, item := range results {
+		final = ShowResults{
+			item.ResultRank,
+			item.ResultJob,
+			item.ResultCompnay,
+			item.ResultLocation,
+			item.ResultIncome,
+			item.ResultDescription,
+			item.ResultSkills,
+			output,
+		}
+	}
+	tpl.ExecuteTemplate(w, "result.html", final)
 
 }
 
@@ -299,7 +341,6 @@ func FindFrelanceJobs() {
 	}
 	if output == "" {
 		log.Println("Job Title is not acceptable use Another one :)")
-		return
 	}
 	output = strings.TrimSpace(output)
 	fmt.Printf("Total: %s Freelance Jobs\n", output)
