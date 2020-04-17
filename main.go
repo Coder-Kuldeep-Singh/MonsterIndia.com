@@ -43,11 +43,14 @@ func main() {
 	// 	fmt.Println(item)
 	// }
 	http.HandleFunc("/", Service)
+	// http.HandleFunc("/results", role.FindJobsByRoleSkill)
+	http.HandleFunc("/results", role.FindJobsByKeywordAndLocation)
+	// role.FindFrelanceJobs()
+	// role.FindJobsByLocation()
 	err := http.ListenAndServe(":3000", nil) // setting listening port
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
-	role.FindJobsByKeywordAndLocation()
 	fmt.Println("====================================================================================================")
 
 }
